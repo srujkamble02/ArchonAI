@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI System Design Tool</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Navbar -->
+    <nav class="top-navbar">
+      <div class="logo">AI System Design</div>
+      <div class="nav-actions">
+        <button class="nav-btn top-nav-btn active" data-view="generator">Core Engine</button>
+        <button class="nav-btn top-nav-btn" data-view="terminal">Terminal</button>
+        <button class="nav-btn top-nav-btn" data-view="deployment">Deployment</button>
+        <button class="nav-btn top-nav-btn" data-view="history">History</button>
+        <button class="nav-btn top-nav-btn" data-view="security">Security</button>
+        <div class="export-dropdown" style="position: relative;">
+          <button class="nav-btn" id="export-dropdown-btn" disabled style="opacity:0.5;">Export ▾</button>
+          <div class="dropdown-content" id="export-menu" style="display:none;">
+            <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; margin-bottom:5px; margin-top:5px; padding-left:0.5rem;">Diagram</div>
+            <button class="nav-btn" style="width:100%; text-align:left; margin-bottom:2px;" onclick="exportDiagram('png')">Download PNG</button>
+            <button class="nav-btn" style="width:100%; text-align:left; margin-bottom:2px;" onclick="exportDiagram('svg')">Download SVG</button>
+            <button class="nav-btn" style="width:100%; text-align:left; margin-bottom:5px;" onclick="exportDiagram('pdf')">Download PDF</button>
+            <hr style="border:none; border-top:1px solid var(--border-light); margin:5px 0;">
+            <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; margin-bottom:5px; margin-top:5px; padding-left:0.5rem;">Full Report</div>
+            <button class="nav-btn" style="width:100%; text-align:left; margin-bottom:2px;" onclick="exportReport('pdf')">Download PDF</button>
+            <button class="nav-btn" style="width:100%; text-align:left; margin-bottom:2px;" onclick="exportReport('json')">Download JSON</button>
+            <button class="nav-btn" style="width:100%; text-align:left; margin-bottom:2px;" onclick="exportReport('html')">Download HTML</button>
+            <button class="nav-btn" style="width:100%; text-align:left; margin-bottom:5px;" onclick="exportReport('md')">Download Markdown</button>
+            <hr style="border:none; border-top:1px solid var(--border-light); margin:5px 0;">
+            <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; margin-bottom:5px; margin-top:5px; padding-left:0.5rem;">Sections</div>
+            <button class="nav-btn" style="width:100%; text-align:left; margin-bottom:2px;" onclick="exportSection('cost', 'csv')">Cost Report (CSV)</button>
+            <button class="nav-btn" style="width:100%; text-align:left; margin-bottom:2px;" onclick="exportSection('failures', 'txt')">Failure Logs (TXT)</button>
+            <button class="nav-btn" style="width:100%; text-align:left;" onclick="exportSection('explanation', 'md')">Explanation (MD)</button>
+          </div>
+        </div>
+        <button class="nav-btn btn-primary" id="top-generate-btn">Generate</button>
+        <div class="avatar">U</div>
+      </div>
+    </nav>
+
+    <!-- VIEW: GENERATOR (Main) -->
+    <div class="main-body view-section active" id="view-generator">
+      <!-- Left Sidebar Navigation -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <span class="engine-version">Engine v2.0.4</span>
+        </div>
+        <nav class="side-nav">
+          <ul>
+            <li><a href="#" class="sidebar-link active" data-target="diagram">Input Core</a></li>
+            <li><a href="#" class="sidebar-link" data-target="blueprint">Architecture</a></li>
+            <li><a href="#" class="sidebar-link" data-target="recommendations">Recommendations</a></li>
+            <li><a href="#" class="sidebar-link" data-target="cost">Cost Analysis</a></li>
+            <li><a href="#" class="sidebar-link" data-target="devops">Jenkins / DevOps</a></li>
+            <li><a href="#" class="sidebar-link" data-target="failures">Failure Logic</a></li>
+            <li><a href="#" class="sidebar-link" data-target="explanation">Explanation</a></li>
+          </ul>
+        </nav>
+        <div class="sidebar-footer">
+          <button class="btn-secondary">New Architecture</button>
+          <ul class="footer-links">
+            <li><a href="#">Documentation</a></li>
+            <li><a href="#">System Logs</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="content-area">
+        
+        <!-- Left: Input Panel -->
+        <section class="input-panel">
+          <div class="panel-header">
+            <h2>Project Specs</h2>
+          </div>
+          <div class="panel-content">
+            <div class="form-group">
+              <label style="display:flex; justify-content:space-between; align-items:center;">
+                Project Description
+                <select id="quick-examples" style="width:auto; padding:0.2rem 0.5rem; font-size:0.7rem; background:transparent; border:1px solid var(--border-light); color:var(--text-muted); cursor:pointer; border-radius:4px; appearance:none;">
+                  <option value="">Use Example...</option>
+                  <option value="Build a food delivery app like Swiggy with real-time GPS tracking, driver management, restaurant onboarding, payment integration, push notifications, and support for 1 million concurrent users.">Food Delivery App</option>
+                  <option value="Design an IoT smart home system with real-time sensor data streaming, device management dashboard, voice integration, MQTT broker, and edge computing at 50K homes.">IoT Smart Home</option>
+                  <option value="Create an EdTech platform with live video classes, AI-powered quiz generation using NLP, student progress analytics, subscription billing, and 500K student capacity.">EdTech Platform</option>
+                </select>
+              </label>
+              <textarea id="project-desc" placeholder="e.g. Build a food delivery app like Swiggy with real-time GPS..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>Scale Override</label>
+              <select id="scale-override" class="form-select">
+                <option value="">Auto-detect</option>
+                <option value="startup">Startup (< 5k users)</option>
+                <option value="mid">Mid (50k users)</option>
+                <option value="large">Large (500k users)</option>
+                <option value="enterprise">Enterprise (2M+ users)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Cloud Provider</label>
+              <select id="cloud-provider" class="form-select">
+                <option value="AWS">AWS</option>
+                <option value="GCP">GCP</option>
+                <option value="Azure">Azure</option>
+              </select>
+            </div>
+
+            <!-- WORKFORCE CONFIGURATION -->
+            <div class="form-group">
+              <label style="display:flex; justify-content:space-between; align-items:center;">
+                Team / Workforce
+                <button id="btn-add-role" type="button" style="background:transparent; border:1px solid var(--primary); color:var(--primary); padding:0.2rem 0.5rem; border-radius:4px; font-size:0.65rem; cursor:pointer; font-weight:600;">+ Add Role</button>
+              </label>
+              <div id="workforce-container" style="margin-top:0.5rem; display:flex; flex-direction:column; gap:0.5rem;">
+                <!-- Dynamic role rows go here -->
+              </div>
+              <div id="workforce-total-preview" style="display:none; margin-top:0.6rem; padding:0.5rem 0.7rem; background:rgba(0,229,255,0.05); border:1px solid rgba(0,229,255,0.15); border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Est. Monthly Workforce Cost</span>
+                  <span id="workforce-total-value" style="font-size:0.9rem; font-weight:700; color:var(--primary); font-family:'JetBrains Mono',monospace;">₹0</span>
+                </div>
+              </div>
+              <div style="margin-top:0.4rem; display:flex; align-items:center; gap:0.5rem;">
+                <label style="font-size:0.6rem; margin-bottom:0;">Currency:</label>
+                <select id="workforce-currency" style="width:auto; padding:0.15rem 0.4rem; font-size:0.65rem; background:transparent; border:1px solid var(--border-light); color:var(--text-muted); cursor:pointer; border-radius:4px;">
+                  <option value="INR">₹ INR</option>
+                </select>
+              </div>
+              <p class="help-text" style="margin-top:0.3rem;">Configure team roles and wages for HR cost estimation.</p>
+            </div>
+
+            <div class="form-group">
+              <label>Anthropic API Key (Optional)</label>
+              <input type="password" id="api-key" placeholder="sk-ant-..." class="form-input">
+              <p class="help-text">Used for the AI explanation tab.</p>
+            </div>
+          </div>
+          <div class="panel-footer">
+            <div class="status-indicator">
+              <span class="dot"></span> Engine Status: Optimal
+            </div>
+          </div>
+        </section>
+
+        <!-- Right: Output Panel -->
+        <section class="output-panel">
+          <div class="panel-header">
+            <div class="tabs">
+              <button class="tab active" data-tab="diagram">Architecture Diagram</button>
+              <button class="tab" data-tab="blueprint">Blueprint</button>
+              <button class="tab" data-tab="recommendations">Recommendations</button>
+              <button class="tab" data-tab="cost">Cost Breakdown</button>
+              <button class="tab" data-tab="devops">Jenkins / DevOps</button>
+              <button class="tab" data-tab="failures">Failure Analysis</button>
+              <button class="tab" data-tab="explanation">AI Explanation</button>
+            </div>
+          </div>
+          <div class="panel-content output-content">
+            
+            <!-- DIAGRAM TAB -->
+            <div id="tab-diagram" class="tab-pane active">
+              <div id="diagram-container" class="placeholder-diagram">
+                <p>Enter a project idea and click generate...</p>
+              </div>
+              <div class="output-details">
+                <div class="detail-card">
+                  <h3>Architecture Decision</h3>
+                  <p id="architecture-type" style="color: var(--primary); font-weight: 600; margin-bottom: 0.5rem;">...</p>
+                  <p id="architecture-reason">Explanation of the generated architecture goes here...</p>
+                </div>
+                <div class="detail-card">
+                  <h3>Estimated Monthly Spend</h3>
+                  <p class="cost-value" id="cost-total">₹0</p>
+                  <p id="cost-basis" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">...</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- COST TAB -->
+            <div id="tab-cost" class="tab-pane" style="display: none;">
+              <div class="detail-card">
+                <h3>Infrastructure Cost</h3>
+                <div id="cost-grid" class="cost-grid">
+                  <p style="color: var(--text-muted)">Generate architecture to see cost breakdown.</p>
+                </div>
+              </div>
+              <!-- Workforce Cost Section -->
+              <div id="workforce-cost-section" class="detail-card" style="display:none; margin-top:1.5rem;">
+                <h3>👥 Workforce / HR Cost</h3>
+                <div id="workforce-cost-breakdown"></div>
+              </div>
+              <!-- Combined Total -->
+              <div id="total-cost-section" class="detail-card" style="display:none; margin-top:1.5rem; border-left:3px solid var(--primary);">
+                <h3>📊 Total Estimated Cost (Infrastructure + HR)</h3>
+                <div id="total-cost-breakdown"></div>
+              </div>
+            </div>
+
+            <!-- FAILURES TAB -->
+            <div id="tab-failures" class="tab-pane" style="display: none;">
+              <div id="best-strategy-summary" class="detail-card" style="display:none; border-left:3px solid var(--success); margin-bottom:1rem;">
+                <h3>🛡️ Best Recovery Strategy</h3>
+                <div id="best-strategy-content"></div>
+              </div>
+              <div class="detail-card">
+                <h3>Failure Scenarios, Mitigations & Recovery Solutions</h3>
+                <div id="failures-list" class="failures-list">
+                  <p style="color: var(--text-muted)">Generate architecture to see failure analysis.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- EXPLANATION TAB -->
+            <div id="tab-explanation" class="tab-pane" style="display: none;">
+              <div class="detail-card">
+                <h3>AI Design Rationale</h3>
+                <div id="explanation-content" class="explanation-content">
+                  <p style="color: var(--text-muted)">Provide an API key and generate to see AI explanation.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- BLUEPRINT TAB -->
+            <div id="tab-blueprint" class="tab-pane" style="display: none;">
+              <div class="detail-card">
+                <h3>Component Stack</h3>
+                <div id="blueprint-stack"><p style="color: var(--text-muted)">Generate architecture to see component stack.</p></div>
+              </div>
+              <div class="output-details" style="margin-top: 1.5rem;">
+                <div class="detail-card">
+                  <h3>Integrations</h3>
+                  <ul id="blueprint-integrations" style="padding-left: 1rem; color: var(--text-main); font-size: 0.9rem; line-height: 1.6;"></ul>
+                </div>
+                <div class="detail-card">
+                  <h3>Security</h3>
+                  <ul id="blueprint-security" style="padding-left: 1rem; color: var(--text-main); font-size: 0.9rem; line-height: 1.6;"></ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- RECOMMENDATIONS TAB -->
+            <div id="tab-recommendations" class="tab-pane" style="display: none;">
+              <div id="rec-archon-summary" class="detail-card" style="border-left:3px solid var(--primary); margin-bottom:1rem;">
+                <h3>⚡ Archon AI Recommendation</h3>
+                <div id="rec-summary-content"><p style="color: var(--text-muted)">Generate architecture to see recommendations.</p></div>
+              </div>
+              <div class="detail-card">
+                <h3>Architecture Options</h3>
+                <div id="rec-architecture-options"></div>
+              </div>
+              <div class="detail-card" style="margin-top:1rem;">
+                <h3>Technology Stack Options</h3>
+                <div id="rec-techstack-options"></div>
+              </div>
+              <div class="detail-card" style="margin-top:1rem;">
+                <h3>Database Options</h3>
+                <div id="rec-database-options"></div>
+              </div>
+              <div class="output-details" style="margin-top:1rem;">
+                <div class="detail-card">
+                  <h3>Cloud Provider Comparison</h3>
+                  <div id="rec-cloud-options"></div>
+                </div>
+                <div class="detail-card">
+                  <h3>DevOps Tool Comparison</h3>
+                  <div id="rec-devops-options"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- DEVOPS TAB -->
+            <div id="tab-devops" class="tab-pane" style="display: none;">
+              <!-- Jenkins Pipeline -->
+              <div class="detail-card" style="border-left:3px solid var(--secondary);">
+                <h3>🔧 Jenkins CI/CD Pipeline</h3>
+                <div id="jenkins-justification" style="margin-bottom:1rem;"></div>
+                <div id="jenkins-stages" style="margin-bottom:1rem;"></div>
+              </div>
+
+              <!-- Jenkinsfile -->
+              <div class="detail-card" style="margin-top:1.5rem;">
+                <h3 style="display:flex; justify-content:space-between; align-items:center;">
+                  📄 Generated Jenkinsfile
+                  <button id="btn-copy-jenkinsfile" style="background:transparent; border:1px solid var(--border-light); color:var(--text-muted); padding:0.25rem 0.6rem; border-radius:4px; font-size:0.65rem; cursor:pointer;">Copy</button>
+                </h3>
+                <pre id="jenkinsfile-code" class="code-block" style="max-height:400px; overflow-y:auto; margin-top:0.5rem;"></pre>
+              </div>
+
+              <!-- Rollback & Monitoring -->
+              <div class="output-details" style="margin-top:1.5rem;">
+                <div class="detail-card">
+                  <h3>♻️ Rollback Strategy</h3>
+                  <div id="jenkins-rollback"></div>
+                </div>
+                <div class="detail-card">
+                  <h3>📊 Monitoring Integration</h3>
+                  <div id="jenkins-monitoring"></div>
+                </div>
+              </div>
+
+              <!-- CI/CD Alternatives -->
+              <div class="detail-card" style="margin-top:1.5rem;">
+                <h3>🔄 CI/CD Alternatives Comparison</h3>
+                <div id="jenkins-alternatives"></div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <!-- VIEW: TERMINAL -->
+    <div class="main-body view-section" id="view-terminal" style="display: none;">
+      <div style="width: 100%; max-width: min(100%, 900px); margin: 0 auto; background: var(--bg-panel); border: 1px solid var(--border-light); border-radius: 8px; display: flex; flex-direction: column; min-height: clamp(300px, 60vh, 600px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <div style="padding: 1rem; border-bottom: 1px solid var(--border-light); display: flex; gap: 8px;">
+          <div style="width:12px; height:12px; border-radius:50%; background:#ef4444;"></div>
+          <div style="width:12px; height:12px; border-radius:50%; background:#eab308;"></div>
+          <div style="width:12px; height:12px; border-radius:50%; background:#22c55e;"></div>
+          <span style="margin-left: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted);">ARCHON_TERMINAL_V2</span>
+        </div>
+        <div id="terminal-output" style="flex: 1; padding: 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; overflow-y: auto; color: var(--text-main); line-height: 1.6;">
+          <div style="color: var(--text-muted);">// Archon Core Initialized. Type 'help' for commands.</div>
+        </div>
+        <div style="padding: 1rem 1.5rem; border-top: 1px solid var(--border-light); display: flex; align-items: center; background: rgba(0,0,0,0.2);">
+          <span style="color: var(--primary); font-family: 'JetBrains Mono', monospace; margin-right: 0.5rem;">guest@archon:~$</span>
+          <input type="text" id="terminal-input" style="flex: 1; background: transparent; border: none; outline: none; color: var(--text-bright); font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;" autocomplete="off" spellcheck="false" autofocus>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: DEPLOYMENT -->
+    <div class="main-body view-section" id="view-deployment" style="display: none;">
+      <div style="width: 100%; max-width: min(100%, 1000px); margin: 0 auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+          <h2 style="font-size: clamp(1.1rem, 2.5vw, 1.5rem); color: var(--text-bright);">Deployment Dashboard</h2>
+          <button id="btn-mock-deploy" class="btn-primary">Deploy to Cloud</button>
+        </div>
+        
+        <div class="cost-grid" style="margin-bottom: 2rem;">
+          <div class="cost-card-mini"><div class="val" id="deploy-region">us-east-1</div><div class="lbl">Primary Region</div></div>
+          <div class="cost-card-mini"><div class="val" id="deploy-status" style="color: var(--text-muted);">IDLE</div><div class="lbl">Status</div></div>
+          <div class="cost-card-mini"><div class="val" id="deploy-health" style="color: var(--text-muted);">UNKNOWN</div><div class="lbl">Health</div></div>
+          <div class="cost-card-mini"><div class="val" id="deploy-uptime">99.99%</div><div class="lbl">Target Uptime</div></div>
+        </div>
+
+        <div class="detail-card" style="margin-bottom: 2rem;">
+          <h3>Deployment Progress</h3>
+          <div style="height: 12px; background: rgba(255,255,255,0.05); border-radius: 6px; margin-top: 1rem; overflow: hidden;">
+            <div id="deploy-progress-bar" style="height: 100%; width: 0%; background: var(--primary); transition: width 0.3s ease; box-shadow: 0 0 10px var(--primary-glow);"></div>
+          </div>
+          <p id="deploy-progress-text" style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-muted); margin-top: 0.8rem;">Waiting to deploy...</p>
+        </div>
+        
+        <div class="detail-card">
+          <h3>Cloud Resources Log</h3>
+          <div id="deploy-logs" style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-muted); height: 200px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 4px;">
+            > System ready.<br>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: HISTORY -->
+    <div class="main-body view-section" id="view-history" style="display: none;">
+      <div style="width: 100%; max-width: min(100%, 1000px); margin: 0 auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+          <h2 style="font-size: clamp(1.1rem, 2.5vw, 1.5rem); color: var(--text-bright);">Architecture History</h2>
+          <button id="btn-clear-history" class="btn-secondary" style="width: auto; margin-bottom: 0;">Clear History</button>
+        </div>
+        <div id="history-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 1.5rem;">
+          <p style="color: var(--text-muted);">No history found. Generate an architecture first.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: SECURITY -->
+    <div class="main-body view-section" id="view-security" style="display: none;">
+      <div style="width: 100%; max-width: min(100%, 1000px); margin: 0 auto; text-align: center; padding-top: clamp(2rem, 6vw, 5rem);">
+        <h2 style="font-size: clamp(1.1rem, 2.5vw, 1.5rem); color: var(--text-bright); margin-bottom: 1rem;">Security Center</h2>
+        <p style="color: var(--text-muted);">Security vulnerability scanning and compliance dashboard coming soon.</p>
+        <div style="margin-top: 2rem; font-size: 3rem; opacity: 0.2;">🔒</div>
+      </div>
+    </div>
+
+  </div>
+  
+  <div id="toast" class="toast">Architecture Generated Successfully</div>
+  <script src="script.js"></script>
+</body>
+</html>

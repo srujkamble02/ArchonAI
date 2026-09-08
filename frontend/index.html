@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Archon AI — Architecture Platform</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --purple:#534AB7;--purple-l:#EEEDFE;--purple-m:#7F77DD;--purple-d:#3C3489;
+  --teal-l:#E1F5EE;--teal-d:#085041;--teal-m:#1D9E75;
+  --amber-l:#FAEEDA;--amber-d:#633806;
+  --coral-l:#FAECE7;--coral-d:#993C1D;
+  --green-l:#EAF3DE;--green-d:#27500A;
+  --gray-l:#F1EFE8;--gray-d:#444441;
+  --bg:#ffffff;--bg2:#f8f8f6;--bg3:#f2f1ee;
+  --text:#1a1a1a;--text2:#666;--text3:#999;
+  --border:rgba(0,0,0,0.10);--border2:rgba(0,0,0,0.18);
+  --radius:8px;--radius-lg:12px;
+  --sidebar-w:clamp(200px,22vw,280px);
+}
+html{font-size:clamp(13px,0.9vw + 0.35rem,15px)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;overflow-x:hidden}
+.app{display:flex;flex-direction:column;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 clamp(10px,2vw,20px);min-height:48px;background:var(--bg);border-bottom:0.5px solid var(--border);flex-shrink:0;z-index:10;flex-wrap:wrap;gap:6px}
+.brand{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.brand-name{font-size:clamp(13px,1.5vw,15px);font-weight:600;letter-spacing:-0.3px}
+.brand-name span{color:var(--purple)}
+.pill{font-size:clamp(9px,1vw,10px);padding:2px 9px;border-radius:20px;background:var(--purple-l);color:var(--purple-d);font-weight:500;white-space:nowrap}
+.topbar-right{display:flex;align-items:center;gap:clamp(6px,1.5vw,12px);flex-wrap:wrap}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#639922;display:inline-block;margin-right:5px;flex-shrink:0}
+.status-txt{font-size:clamp(11px,1.2vw,12px);color:var(--text2)}
+.dl-group{display:flex;gap:clamp(4px,0.8vw,6px);flex-wrap:wrap}
+.dl-btn{font-size:clamp(10px,1.1vw,11px);padding:5px clamp(6px,1.5vw,11px);border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text2);cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
+.dl-btn:hover:not(:disabled){background:var(--purple-l);color:var(--purple-d);border-color:var(--purple-m)}
+.dl-btn:disabled{opacity:.35;cursor:not-allowed}
+.dl-btn.pdl{background:var(--purple);color:#fff;border-color:var(--purple)}
+.dl-btn.pdl:hover:not(:disabled){opacity:.88}
+.body{display:flex;flex:1;overflow:hidden;min-height:0}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--bg);border-right:0.5px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.sb-section{padding:clamp(10px,2vw,16px);border-bottom:0.5px solid var(--border)}
+.sb-section:last-child{border-bottom:none;flex:1;display:flex;flex-direction:column;justify-content:flex-end}
+.lbl{font-size:clamp(9px,1vw,10px);font-weight:600;letter-spacing:0.5px;color:var(--text3);text-transform:uppercase;margin-bottom:6px}
+textarea{width:100%;height:clamp(72px,10vh,96px);resize:none;font-size:clamp(11px,1.3vw,12.5px);line-height:1.6;padding:9px 10px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:inherit}
+textarea:focus{outline:none;border-color:var(--purple-m);box-shadow:0 0 0 2px rgba(127,119,221,0.15)}
+select,input[type=text],input[type=password]{width:100%;padding:7px 9px;font-size:clamp(11px,1.3vw,12.5px);border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:inherit}
+select:focus,input:focus{outline:none;border-color:var(--purple-m)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn-primary{width:100%;padding:10px;font-size:clamp(12px,1.3vw,13px);font-weight:600;background:var(--purple);color:#fff;border:none;border-radius:var(--radius);cursor:pointer;transition:opacity .15s;letter-spacing:0.2px}
+.btn-primary:hover{opacity:.88}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.ex-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.ex-btn{font-size:clamp(9.5px,1.1vw,10.5px);padding:5px 8px;border:0.5px solid var(--border2);border-radius:var(--radius);cursor:pointer;color:var(--text2);background:var(--bg2);text-align:left;line-height:1.3;font-family:inherit}
+.ex-btn:hover{background:var(--bg3);color:var(--text)}
+.api-note{font-size:clamp(10px,1.1vw,11px);color:var(--text3);margin-top:5px;line-height:1.5}
+.content{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.tabs-bar{display:flex;align-items:center;background:var(--bg);border-bottom:0.5px solid var(--border);padding:0 clamp(8px,2vw,16px);flex-shrink:0;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+.tabs-bar::-webkit-scrollbar{display:none}
+.tab-btn{font-size:clamp(10px,1.2vw,12px);padding:12px clamp(8px,1.5vw,14px);cursor:pointer;color:var(--text2);border:none;border-bottom:2px solid transparent;background:none;font-family:inherit;white-space:nowrap;transition:color .15s;flex-shrink:0}
+.tab-btn.on{color:var(--purple);border-bottom-color:var(--purple);font-weight:600}
+.tab-btn:hover{color:var(--text)}
+.pane{flex:1;overflow-y:auto;padding:clamp(12px,2.5vw,20px) clamp(12px,3vw,24px)}
+.empty{text-align:center;padding:clamp(40px,10vh,80px) 20px;color:var(--text3)}
+.empty h3{font-size:clamp(13px,1.8vw,15px);font-weight:500;margin-bottom:6px;color:var(--text2)}
+.empty p{font-size:clamp(12px,1.4vw,13px);line-height:1.6}
+.spin{display:flex;flex-direction:column;align-items:center;gap:12px;padding:clamp(40px,8vh,80px) 20px}
+.dots{display:flex;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--purple-m);animation:blink 1.2s ease-in-out infinite}
+.dot:nth-child(2){animation-delay:.2s}
+.dot:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.2;transform:scale(.75)}40%{opacity:1;transform:scale(1)}}
+.spin p{font-size:clamp(11px,1.3vw,12.5px);color:var(--text2);max-width:min(400px,90%);text-align:center;line-height:1.6}
+.card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:clamp(12px,2vw,16px) clamp(12px,2vw,18px);margin-bottom:16px}
+.card-title{font-size:clamp(11px,1.2vw,12px);font-weight:600;color:var(--text);padding-bottom:10px;border-bottom:0.5px solid var(--border);margin-bottom:12px;letter-spacing:0.2px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.badge{display:inline-block;font-size:clamp(9px,1vw,10px);padding:2px 9px;border-radius:20px;margin:2px 3px 2px 0;font-weight:500}
+.b-purple{background:var(--purple-l);color:var(--purple-d)}
+.b-teal{background:var(--teal-l);color:var(--teal-d)}
+.b-amber{background:var(--amber-l);color:var(--amber-d)}
+.b-coral{background:var(--coral-l);color:var(--coral-d)}
+.b-gray{background:var(--gray-l);color:var(--gray-d)}
+.row-item{display:flex;gap:10px;padding:7px 0;border-bottom:0.5px solid var(--border);font-size:clamp(11px,1.3vw,12.5px);align-items:flex-start;flex-wrap:wrap}
+.row-item:last-child{border-bottom:none}
+.ri-a{flex:0 0 auto;min-width:70px;max-width:100px;color:var(--text2);padding-top:1px;font-size:clamp(10px,1.2vw,12px)}
+.ri-b{font-weight:600;flex:0 0 auto;min-width:100px;max-width:150px;font-size:clamp(10px,1.2vw,12px)}
+.ri-c{color:var(--text2);line-height:1.5;flex:1;min-width:0;word-break:break-word}
+.conf-bar{height:5px;border-radius:3px;background:var(--bg3);overflow:hidden;margin:6px 0 10px}
+.conf-fill{height:100%;border-radius:3px;background:var(--purple-m);transition:width 1.2s ease}
+.tradeoff{background:var(--amber-l);border-radius:var(--radius);padding:9px 12px;font-size:clamp(11px,1.2vw,12px);color:var(--amber-d);margin-top:8px;line-height:1.6}
+.note-box{background:var(--teal-l);border-radius:var(--radius);padding:9px 12px;font-size:clamp(11px,1.2vw,12px);color:var(--teal-d);margin-top:8px;line-height:1.6}
+.cost-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,130px),1fr));gap:8px;margin-top:10px}
+.cost-card{background:var(--bg2);border-radius:var(--radius);padding:11px 12px}
+.cost-card.hl{background:var(--purple-l);border:1.5px solid var(--purple-m)}
+.cost-amt{font-size:clamp(14px,2vw,18px);font-weight:600;color:var(--purple)}
+.cost-card.hl .cost-amt{color:var(--purple-d)}
+.cost-lbl{font-size:clamp(9px,1vw,10px);color:var(--text2);margin-top:2px}
+.fail-row{display:flex;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border);align-items:flex-start}
+.fail-row:last-child{border-bottom:none}
+.fail-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.fail-dot.critical,.fail-dot.high{background:#E24B4A}
+.fail-dot.medium{background:#EF9F27}
+.fail-dot.low{background:#639922}
+.fail-title{font-size:clamp(11px,1.3vw,12.5px);font-weight:600;margin-bottom:3px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.fail-trigger{font-size:clamp(10px,1.1vw,11px);color:var(--text3);margin-bottom:4px}
+.fail-mit{font-size:clamp(11px,1.2vw,12px);color:var(--text2);line-height:1.55}
+.fail-det{font-size:clamp(10px,1.1vw,11px);color:var(--purple-m);margin-top:3px;font-style:italic}
+.pipe-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:clamp(11px,1.3vw,12.5px)}
+.pipe-row:last-child{border-bottom:none}
+.step-num{width:24px;height:24px;border-radius:50%;background:var(--purple-l);color:var(--purple-d);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.mermaid-wrap{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px;font-family:'SFMono-Regular',Consolas,monospace;font-size:clamp(10px,1.1vw,11px);line-height:1.8;white-space:pre-wrap;overflow-x:auto;margin-top:10px}
+.copy-btn{font-size:clamp(10px,1.1vw,11px);padding:4px 12px;border:0.5px solid var(--border2);border-radius:var(--radius);background:none;cursor:pointer;color:var(--text2);font-family:inherit}
+.copy-btn:hover{background:var(--bg2)}
+.svg-wrap{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px;margin-top:10px;overflow-x:auto}
+.svg-wrap svg,.svg-wrap img{max-width:100%;height:auto;display:block}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,100px),1fr));gap:8px;margin-top:10px}
+.feat-card{background:var(--bg2);border-radius:var(--radius);padding:10px 12px;text-align:center}
+.feat-val{font-size:clamp(12px,1.6vw,14px);font-weight:600;margin-bottom:2px}
+.feat-lbl{font-size:clamp(9px,1vw,10px);color:var(--text2)}
+.feat-yes{color:var(--teal-m)}
+.feat-no{color:var(--text3)}
+.metrics-row{display:flex;gap:clamp(8px,2vw,16px);margin-top:8px;flex-wrap:wrap}
+.metric{font-size:clamp(11px,1.2vw,12px);color:var(--text2)}
+.metric strong{color:var(--text);font-weight:600}
+.err-box{background:var(--coral-l);border-radius:var(--radius);padding:12px 16px;color:var(--coral-d);font-size:clamp(12px,1.4vw,13px);margin:20px 0;line-height:1.6}
+.explain-text{font-size:clamp(12px,1.5vw,13.5px);line-height:1.8;color:var(--text)}
+.explain-text p{margin-bottom:12px}
+.toast{position:fixed;bottom:clamp(12px,3vh,24px);right:clamp(12px,3vw,24px);background:#222;color:#fff;font-size:clamp(11px,1.3vw,12.5px);padding:10px 18px;border-radius:var(--radius);opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:9999;max-width:min(320px,calc(100vw - 2rem))}
+.toast.show{opacity:1;transform:translateY(0)}
+.diag-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.diag-btn{font-size:clamp(10px,1.1vw,11px);padding:6px 14px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text2);cursor:pointer;font-family:inherit;transition:all .15s}
+.diag-btn:hover{background:var(--purple-l);color:var(--purple-d);border-color:var(--purple-m)}
+
+/* ── Responsive breakpoints ── */
+@media(max-width:1024px){:root{--sidebar-w:220px}}
+@media(max-width:768px){
+  :root{--sidebar-w:100%}
+  .body{flex-direction:column;overflow-y:auto;height:auto}
+  .sidebar{width:100%;max-height:45vh;border-right:none;border-bottom:0.5px solid var(--border);flex-shrink:0}
+  .content{overflow:visible}
+  .pane{overflow-y:visible}
+  .app{height:auto}
+  .cost-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,120px),1fr))}
+  .feat-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:600px){
+  .topbar{flex-wrap:wrap;align-items:flex-start;padding:8px 12px}
+  .topbar-right,.dl-group{flex-wrap:wrap}
+  .sidebar{max-height:none}
+  .row2{grid-template-columns:1fr}
+  .feat-grid{grid-template-columns:repeat(2,1fr)}
+  .cost-grid{grid-template-columns:repeat(2,1fr)}
+  .row-item{flex-direction:column;gap:4px}
+  .ri-a,.ri-b{max-width:100%}
+  .pane{padding:12px}
+  .tab-btn{padding:10px 8px}
+}
+@media(max-width:375px){
+  .pill{display:none}
+  .feat-grid,.cost-grid{grid-template-columns:1fr 1fr}
+  .ex-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-name"><span>Archon</span> AI</div>
+      <div class="pill">Architecture Platform v1.0</div>
+    </div>
+    <div class="topbar-right">
+      <div class="dl-group">
+        <button class="dl-btn" id="btn-dl-tab"  onclick="downloadCurrent()" disabled>Export tab</button>
+        <button class="dl-btn" id="btn-dl-json" onclick="downloadJSON()"    disabled>JSON</button>
+        <button class="dl-btn pdl" id="btn-dl-all" onclick="downloadAll()" disabled>Full report</button>
+      </div>
+      <div>
+        <span class="status-dot" id="sdot"></span>
+        <span class="status-txt" id="stxt">Ready</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="sidebar">
+      <div class="sb-section">
+        <div class="lbl">Project idea</div>
+        <textarea id="inp" placeholder="Describe your software idea in plain English…&#10;&#10;e.g. Build a food delivery app like Swiggy with real-time GPS, payments, and 1M users"></textarea>
+      </div>
+      <div class="sb-section">
+        <div class="lbl">Quick examples</div>
+        <div class="ex-grid">
+          <button class="ex-btn" onclick="setEx(0)">Food delivery (1M users)</button>
+          <button class="ex-btn" onclick="setEx(1)">EdTech + AI quizzes</button>
+          <button class="ex-btn" onclick="setEx(2)">IoT smart home</button>
+          <button class="ex-btn" onclick="setEx(3)">SaaS CRM multi-tenant</button>
+          <button class="ex-btn" onclick="setEx(4)">Healthcare / HIPAA</button>
+          <button class="ex-btn" onclick="setEx(5)">Fintech wallet app</button>
+        </div>
+      </div>
+      <div class="sb-section">
+        <div class="row2">
+          <div>
+            <div class="lbl">Scale override</div>
+            <select id="scale">
+              <option value="">Auto-detect</option>
+              <option value="startup">Startup</option>
+              <option value="mid">Mid (100K)</option>
+              <option value="large">Large (1M)</option>
+              <option value="enterprise">Enterprise</option>
+            </select>
+          </div>
+          <div>
+            <div class="lbl">Cloud</div>
+            <select id="cloud">
+              <option value="AWS">AWS</option>
+              <option value="GCP">GCP</option>
+              <option value="Azure">Azure</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="sb-section">
+        <div class="lbl">Backend URL</div>
+        <input type="text" id="backend-url" value="http://localhost:8000"/>
+        <div class="lbl" style="margin-top:10px">Anthropic API key (optional)</div>
+        <input type="password" id="api-key" placeholder="sk-ant-…"/>
+        <div class="api-note">Used only for the AI explanation tab. All architecture logic is rule-based.</div>
+      </div>
+      <div class="sb-section">
+        <button class="btn-primary" id="gen-btn" onclick="generate()">Generate Architecture</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="tabs-bar">
+        <button class="tab-btn on" onclick="sw('overview',this)">Overview</button>
+        <button class="tab-btn"   onclick="sw('blueprint',this)">Blueprint</button>
+        <button class="tab-btn"   onclick="sw('diagram',this)">Diagram</button>
+        <button class="tab-btn"   onclick="sw('cloud',this)">Cloud plan</button>
+        <button class="tab-btn"   onclick="sw('devops',this)">DevOps pipeline</button>
+        <button class="tab-btn"   onclick="sw('cost',this)">Cost estimate</button>
+        <button class="tab-btn"   onclick="sw('failures',this)">Failure analysis</button>
+        <button class="tab-btn"   onclick="sw('explain',this)">AI explanation</button>
+      </div>
+      <div class="pane" id="pane">
+        <div class="empty">
+          <h3>Enter a project idea to get started</h3>
+          <p>Archon AI runs a 7-step rule-based + AI hybrid pipeline and populates all eight tabs with a complete architecture blueprint.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================================================================
+   ARCHON AI — index.html JavaScript
+   Single <script> block. No JS outside this block. No duplicates.
+   ================================================================ */
+
+// ── App state ────────────────────────────────────────────────────
+let currentTab = 'overview';
+let result     = null;
+
+// ── Static data ──────────────────────────────────────────────────
+const EXAMPLES = [
+  "Build a food delivery app like Swiggy with real-time GPS tracking, driver management, restaurant onboarding, Razorpay payment integration, push notifications, and support for 1 million concurrent users.",
+  "Create an EdTech platform with live video classes, AI-powered quiz generation using NLP, student progress analytics, subscription billing via Stripe, and 500K student capacity.",
+  "Design an IoT smart home system with real-time sensor data streaming, device management dashboard, Alexa voice integration, MQTT broker, edge computing at 50K homes.",
+  "Build a multi-tenant SaaS CRM with email automation, sales pipeline tracking, Slack integration, role-based access control, advanced analytics, and white-labeling for 200K enterprise users.",
+  "Develop a telemedicine platform with video consultations, appointment scheduling, prescription management, EHR integration, insurance billing, HIPAA compliance for 100K patients.",
+  "Build a fintech digital wallet app with UPI payments, peer-to-peer transfers, merchant QR scanning, real-time transaction notifications, and fraud detection AI for 500K users."
+];
+
+const DEVOPS_STEPS = [
+  "Code push triggers GitHub Actions CI workflow",
+  "Run unit tests, integration tests, and lint checks",
+  "Build Docker image and tag with Git commit SHA",
+  "Push image to AWS ECR (Elastic Container Registry)",
+  "Run Trivy security scan on Docker image",
+  "Deploy to staging environment via Helm chart (EKS)",
+  "Smoke tests and API health-check verification on staging",
+  "Blue-green deploy to production with zero-downtime rollout",
+  "Post-deploy monitoring — CloudWatch + Grafana dashboard verification"
+];
+
+const MONITORING_STACK = [
+  "Prometheus — metrics scraping from all services (RED method: rate, errors, duration)",
+  "Grafana — live dashboards for request rate, error rate, and p99 latency",
+  "CloudWatch — AWS resource metrics and centralised log aggregation",
+  "Jaeger / AWS X-Ray — distributed tracing across microservice boundaries",
+  "PagerDuty — on-call alerting with escalation policies and incident management"
+];
+
+// ── Utilities ─────────────────────────────────────────────────────
+
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmt(n) { return '₹' + new Intl.NumberFormat('en-IN').format(Math.round(Number(n) || 0)); }
+
+function slugify(s) {
+  return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+}
+
+function today() { return new Date().toISOString().slice(0,10); }
+
+function setEx(i) { document.getElementById('inp').value = EXAMPLES[i]; }
+
+// ── Status & Toast ────────────────────────────────────────────────
+
+function setStatus(txt, busy) {
+  document.getElementById('stxt').textContent = txt;
+  document.getElementById('sdot').style.background = busy ? '#EF9F27' : '#639922';
+}
+
+function toast(msg, ms = 2800) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+// ── Download helpers ──────────────────────────────────────────────
+
+function enableDownloads(on) {
+  ['btn-dl-tab','btn-dl-all','btn-dl-json'].forEach(id => {
+    document.getElementById(id).disabled = !on;
+  });
+}
+
+function triggerDownload(filename, content, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// ── downloadCurrent(): current tab → .txt ────────────────────────
+
+function downloadCurrent() {
+  if (!result) { alert('Generate an architecture first.'); return; }
+
+  const d    = result;
+  const f    = d.features     || {};
+  const a    = d.architecture || {};
+  const c    = d.cost         || {};
+  const g    = d.graph        || {};
+  const fails = d.failures    || [];
+  const diag  = d.diagrams    || {};
+  const SEP   = '─'.repeat(60);
+  let txt = '';
+
+  if (currentTab === 'overview') {
+    txt = [
+      'ARCHON AI — SYSTEM OVERVIEW', SEP,
+      `Architecture     : ${a.architecture || '—'}`,
+      `Confidence       : ${a.confidence || 0}%`,
+      `Scale            : ${(f.scale_label || '—').toUpperCase()} — ${(f.scale || 0).toLocaleString()} users`,
+      `Cloud            : ${d.cloud_provider || 'AWS'}`,
+      `Est. Cost        : ${fmt(c.total_monthly)}/month`,
+      '', 'FEATURES DETECTED', SEP,
+      `Real-time        : ${f.real_time       ? 'Yes' : 'No'}`,
+      `Payments         : ${f.payments        ? 'Yes' : 'No'}`,
+      `AI/ML            : ${f.ai_required     ? 'Yes' : 'No'}`,
+      `IoT              : ${f.iot             ? 'Yes' : 'No'}`,
+      `Platform         : ${f.platform        || 'web'}`,
+      `Security critical: ${f.security_critical ? 'Yes' : 'No'}`,
+      '', 'GRAPH METRICS', SEP,
+      `Nodes            : ${g.metrics?.node_count || 0}`,
+      `Edges            : ${g.metrics?.edge_count || 0}`,
+      `Is DAG           : ${g.metrics?.is_dag     ? 'Yes' : 'No'}`,
+      `Critical path    : ${(g.metrics?.critical_path || []).length} hops`,
+    ].join('\n');
+
+  } else if (currentTab === 'blueprint') {
+    txt = [
+      'ARCHON AI — ARCHITECTURE BLUEPRINT', SEP,
+      `Architecture  : ${a.architecture}`,
+      `Confidence    : ${a.confidence}%`,
+      `Reason        : ${a.reason}`,
+      `Tradeoffs     : ${a.tradeoffs}`,
+      '', 'COMPONENT STACK', SEP,
+      ...(a.components || []).map(c => `${(c.layer+':').padEnd(22)} ${c.tech.padEnd(35)} ${c.role}`),
+      '', 'INTEGRATIONS', SEP,
+      ...(a.integrations || []).map(i => `• ${i.name}: ${i.purpose}`),
+      '', 'SECURITY', SEP,
+      ...(a.security || []).map(s => `• ${s}`),
+    ].join('\n');
+
+  } else if (currentTab === 'diagram') {
+    txt = diag.mermaid || 'No diagram generated.';
+
+  } else if (currentTab === 'cloud') {
+    txt = [
+      `ARCHON AI — CLOUD PLAN (${d.cloud_provider || 'AWS'})`, SEP,
+      ...(a.components || []).map(c => `${(c.layer+':').padEnd(22)} ${c.tech.padEnd(35)} ${c.role}`),
+      '', 'CRITICAL PATH', SEP,
+      (g.metrics?.critical_path || []).join(' → ') || 'N/A',
+    ].join('\n');
+
+  } else if (currentTab === 'devops') {
+    txt = [
+      'ARCHON AI — DEVOPS PIPELINE', SEP,
+      'CI/CD: GitHub Actions + Docker + Kubernetes (EKS)', '',
+      ...DEVOPS_STEPS.map((s,i) => `${String(i+1).padStart(2)}. ${s}`),
+      '', 'MONITORING STACK', SEP,
+      ...MONITORING_STACK.map(s => `• ${s}`),
+    ].join('\n');
+
+  } else if (currentTab === 'cost') {
+    txt = [
+      `ARCHON AI — COST ESTIMATE (${(f.scale_label||'mid').toUpperCase()} SCALE)`, SEP,
+      `Compute      : ${fmt(c.compute)}`,
+      `Database     : ${fmt(c.database)}`,
+      `Storage      : ${fmt(c.storage)}`,
+      `Messaging    : ${fmt(c.messaging)}`,
+      `Networking   : ${fmt(c.networking)}`,
+      `Monitoring   : ${fmt(c.monitoring)}`,
+      ...(c.ai_serving > 0 ? [`AI Serving   : ${fmt(c.ai_serving)}`] : []),
+      ...(c.iot        > 0 ? [`IoT          : ${fmt(c.iot)}`]        : []),
+      '', `TOTAL/MONTH  : ${fmt(c.total_monthly)}`,
+      `At 10x scale : ${fmt(c.scaling_10x_estimate)}`, '',
+      c.note || '', `Basis: ${c.basis || ''}`,
+    ].join('\n');
+
+  } else if (currentTab === 'failures') {
+    txt = ['ARCHON AI — FAILURE ANALYSIS', SEP,
+      ...fails.flatMap(f => [
+        `Scenario  : ${f.scenario}`,
+        `Impact    : ${f.impact}`,
+        `Trigger   : ${f.trigger || '—'}`,
+        `Mitigation: ${f.mitigation}`,
+        f.detection ? `Detection : ${f.detection}` : null,
+        '',
+      ].filter(l => l !== null)),
+    ].join('\n');
+
+  } else if (currentTab === 'explain') {
+    txt = [
+      'ARCHON AI — AI EXPLANATION', SEP,
+      d.explanation || '(No explanation generated — add an Anthropic API key)',
+      '', 'PIPELINE STEPS', SEP,
+      ...(d.pipeline?.steps || []).map((s,i) => `${i+1}. ${s}`),
+      '', `AI role: ${d.pipeline?.ai_used_for || '—'}`,
+    ].join('\n');
+
+  } else {
+    txt = 'No content for this tab.';
+  }
+
+  const arch  = slugify((a.architecture || 'archon').substring(0, 20));
+  triggerDownload(`archon_${arch}_${currentTab}_${today()}.txt`, txt, 'text/plain');
+  toast(`"${currentTab}" tab exported as .txt`);
+}
+
+// ── downloadJSON(): full result → .json ──────────────────────────
+
+function downloadJSON() {
+  if (!result) { alert('Generate an architecture first.'); return; }
+  const arch = slugify((result.architecture?.architecture || 'archon').substring(0, 20));
+  triggerDownload(`archon_${arch}_${today()}.json`, JSON.stringify(result, null, 2), 'application/json');
+  toast('JSON exported');
+}
+
+// ── downloadAll(): professional HTML report ───────────────────────
+
+function downloadAll() {
+  if (!result) { alert('Generate an architecture first.'); return; }
+
+  const d    = result;
+  const f    = d.features     || {};
+  const a    = d.architecture || {};
+  const c    = d.cost         || {};
+  const g    = d.graph        || {};
+  const diag = d.diagrams     || {};
+  const fails = d.failures    || [];
+  const arch  = slugify((a.architecture || 'archon').substring(0, 20));
+
+  const kv = (k, v) => `<tr><td class="k">${esc(k)}</td><td>${esc(String(v))}</td></tr>`;
+
+  const costRow = (label, val) => val > 0
+    ? `<div class="cost-card"><div class="cost-val">${fmt(val)}</div><div class="cost-lbl">${esc(label)}</div></div>`
+    : '';
+
+  const paras = (d.explanation || '').split('\n\n').filter(Boolean)
+    .map(p => `<p>${esc(p)}</p>`).join('');
+
+  const critPath = (g.metrics?.critical_path || []).join(' → ') || 'N/A';
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Archon AI Architecture Report — ${esc(a.architecture || '')} — ${today()}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Georgia,sans-serif;color:#1a1a1a;background:#f7f7f5}
+.cover{background:#534AB7;color:#fff;padding:56px 72px}
+.cover h1{font-size:30px;font-weight:700;letter-spacing:-0.4px;margin-bottom:6px}
+.cover .sub{font-size:14px;opacity:.75;margin-bottom:28px}
+.cover-meta{display:flex;gap:20px;flex-wrap:wrap}
+.cm{background:rgba(255,255,255,.13);border-radius:8px;padding:12px 18px;min-width:110px}
+.cm .val{font-size:20px;font-weight:700}
+.cm .lbl{font-size:11px;opacity:.7;margin-top:3px}
+.wrap{max-width:920px;margin:0 auto;padding:40px 48px}
+section{margin-bottom:40px;page-break-inside:avoid}
+h2{font-size:17px;font-weight:700;color:#534AB7;border-bottom:2px solid #EEEDFE;padding-bottom:9px;margin-bottom:14px}
+h3{font-size:13.5px;font-weight:600;color:#333;margin:16px 0 8px}
+p{font-size:13px;line-height:1.75;color:#333;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:8px}
+th{background:#EEEDFE;color:#3C3489;padding:8px 12px;text-align:left;font-weight:600;font-size:12px}
+td{padding:8px 12px;border-bottom:.5px solid #e8e8e6;vertical-align:top}
+td.k{font-weight:600;width:190px;color:#555;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:nth-child(even) td{background:#fafaf8}
+ul,ol{padding-left:20px;margin-bottom:8px}
+li{font-size:13px;padding:4px 0;line-height:1.6;color:#333}
+.callout{border-radius:8px;padding:10px 14px;font-size:13px;line-height:1.65;margin-top:12px}
+.amber{background:#FAEEDA;color:#633806}
+.teal{background:#E1F5EE;color:#085041}
+.badge-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.bdg{display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500}
+.bdg-yes{background:#E1F5EE;color:#085041}
+.bdg-no{background:#F1EFE8;color:#5F5E5A}
+.bdg-warn{background:#FAECE7;color:#993C1D}
+.cost-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.cost-card{background:#fff;border:.5px solid #e0e0dc;border-radius:8px;padding:14px;text-align:center}
+.cost-card.total{background:#EEEDFE;border-color:#7F77DD}
+.cost-val{font-size:20px;font-weight:700;color:#534AB7}
+.cost-card.total .cost-val{color:#3C3489}
+.cost-lbl{font-size:11px;color:#888;margin-top:4px}
+.fail-block{border-radius:8px;padding:14px 16px;margin-bottom:10px;background:#fff;border:.5px solid #e8e8e6;border-left:4px solid #ccc}
+.fail-block.high,.fail-block.critical{border-left-color:#E24B4A}
+.fail-block.medium{border-left-color:#EF9F27}
+.fail-block.low{border-left-color:#639922}
+.fh{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:5px}
+.ft{font-size:13px;font-weight:600}
+.fi{font-size:10px;padding:2px 8px;border-radius:20px;background:#FAECE7;color:#993C1D;font-weight:600;flex-shrink:0}
+.fm{font-size:11px;color:#999;margin-bottom:5px}
+.fb{font-size:12.5px;color:#444;line-height:1.6}
+.fd{font-size:11px;color:#7F77DD;margin-top:5px;font-style:italic}
+.svg-box{background:#f8f8f6;border:.5px solid #e0e0dc;border-radius:8px;padding:12px;overflow:hidden}
+.svg-box svg{width:100%}
+pre{background:#f8f8f6;border:.5px solid #e0e0dc;border-radius:8px;padding:14px;font-size:11px;line-height:1.8;white-space:pre-wrap;overflow-x:auto;font-family:'SFMono-Regular',Consolas,monospace}
+.foot{text-align:center;padding:28px;font-size:12px;color:#aaa;border-top:.5px solid #e8e8e6;margin-top:32px}
+@media print{body{background:#fff}.cover{page-break-after:always}.wrap{padding:20px 24px}section{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>Archon AI — Architecture Report</h1>
+  <div class="sub">Generated ${today()} &nbsp;·&nbsp; ${esc(a.architecture||'—')} &nbsp;·&nbsp; ${esc(d.cloud_provider||'AWS')}</div>
+  <div class="cover-meta">
+    <div class="cm"><div class="val">${esc(a.architecture||'—')}</div><div class="lbl">Architecture</div></div>
+    <div class="cm"><div class="val">${a.confidence||0}%</div><div class="lbl">Confidence</div></div>
+    <div class="cm"><div class="val">${fmt(c.total_monthly)}<small style="font-size:12px">/mo</small></div><div class="lbl">Est. cost</div></div>
+    <div class="cm"><div class="val">${(f.scale||0).toLocaleString()}</div><div class="lbl">Concurrent users</div></div>
+    <div class="cm"><div class="val">${fails.length}</div><div class="lbl">Failure scenarios</div></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<section>
+  <h2>1. System overview</h2>
+  <table>
+    ${kv('Architecture',    a.architecture||'—')}
+    ${kv('Confidence',      `${a.confidence||0}%`)}
+    ${kv('Scale',           `${(f.scale_label||'—').toUpperCase()} — ${(f.scale||0).toLocaleString()} users`)}
+    ${kv('Platform',        f.platform||'web')}
+    ${kv('Cloud provider',  d.cloud_provider||'AWS')}
+    ${kv('Est. monthly cost',`${fmt(c.total_monthly)}`)}
+    ${kv('Graph nodes',     g.metrics?.node_count||0)}
+    ${kv('Graph edges',     g.metrics?.edge_count||0)}
+    ${kv('Critical path',   critPath)}
+  </table>
+  <div class="badge-row">
+    ${f.real_time        ? '<span class="bdg bdg-yes">Real-time</span>'        : '<span class="bdg bdg-no">No real-time</span>'}
+    ${f.payments         ? '<span class="bdg bdg-yes">Payments</span>'         : ''}
+    ${f.ai_required      ? '<span class="bdg bdg-yes">AI / ML</span>'          : ''}
+    ${f.iot              ? '<span class="bdg bdg-yes">IoT</span>'              : ''}
+    ${f.security_critical? '<span class="bdg bdg-warn">Security critical</span>':''}
+  </div>
+  <p style="margin-top:12px">${esc(a.reason||'')}</p>
+  <div class="callout amber"><strong>Tradeoff:</strong> ${esc(a.tradeoffs||'')}</div>
+</section>
+
+<section>
+  <h2>2. Component stack</h2>
+  <table>
+    <thead><tr><th>Layer</th><th>Technology</th><th>Role</th></tr></thead>
+    <tbody>
+      ${(a.components||[]).map(c=>`<tr><td><strong>${esc(c.layer)}</strong></td><td>${esc(c.tech)}</td><td>${esc(c.role)}</td></tr>`).join('')}
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>3. Integrations &amp; APIs</h2>
+  <table>
+    <thead><tr><th>Service</th><th>Purpose</th><th>Category</th></tr></thead>
+    <tbody>
+      ${(a.integrations||[]).map(i=>`<tr><td><strong>${esc(i.name)}</strong></td><td>${esc(i.purpose)}</td><td>${esc(i.category||'—')}</td></tr>`).join('')}
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>4. Security recommendations</h2>
+  <ul>${(a.security||[]).map(s=>`<li>${esc(s)}</li>`).join('')}</ul>
+</section>
+
+<section>
+  <h2>5. Architecture diagram</h2>
+  ${diag.svg ? `<div class="svg-box">${diag.svg}</div>` : '<p>No SVG diagram generated.</p>'}
+  <h3>Mermaid diagram code</h3>
+  ${diag.mermaid ? `<pre>${esc(diag.mermaid)}</pre>` : '<p>No Mermaid code generated.</p>'}
+</section>
+
+<section>
+  <h2>6. DevOps pipeline</h2>
+  <ol>${DEVOPS_STEPS.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
+  <h3>Monitoring stack</h3>
+  <ul>${MONITORING_STACK.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>
+</section>
+
+<section>
+  <h2>7. Cost estimate</h2>
+  <div class="cost-grid">
+    ${costRow('Compute (EC2/EKS)', c.compute)}
+    ${costRow('Database (RDS+Redis)', c.database)}
+    ${costRow('Storage (S3+CDN)', c.storage)}
+    ${costRow('Messaging', c.messaging)}
+    ${costRow('Networking', c.networking)}
+    ${costRow('Monitoring', c.monitoring)}
+    ${costRow('AI serving', c.ai_serving)}
+    ${costRow('IoT', c.iot)}
+    <div class="cost-card total"><div class="cost-val">${fmt(c.total_monthly)}</div><div class="cost-lbl">Total / month</div></div>
+  </div>
+  <div class="callout teal" style="margin-top:14px">${esc(c.note||'')}</div>
+  <p style="margin-top:8px;font-size:12px;color:#777">At 10x scale: <strong>${fmt(c.scaling_10x_estimate)}/month</strong> &nbsp;·&nbsp; Basis: ${esc(c.basis||'')}</p>
+</section>
+
+<section>
+  <h2>8. Failure analysis</h2>
+  ${fails.map(f=>`
+  <div class="fail-block ${(f.impact||'medium').toLowerCase()}">
+    <div class="fh"><span class="ft">${esc(f.scenario)}</span><span class="fi">${esc(f.impact)}</span></div>
+    ${f.trigger   ? `<div class="fm">Trigger: ${esc(f.trigger)}</div>` : ''}
+    <div class="fb">${esc(f.mitigation)}</div>
+    ${f.detection ? `<div class="fd">Detection: ${esc(f.detection)}</div>` : ''}
+  </div>`).join('')}
+</section>
+
+<section>
+  <h2>9. AI explanation</h2>
+  ${paras || '<p style="color:#999">No explanation generated — add an Anthropic API key and regenerate.</p>'}
+</section>
+
+<div class="foot">
+  Generated by Archon AI &nbsp;·&nbsp; Adichunchanagiri Institute of Technology &nbsp;·&nbsp; ${today()}
+</div>
+
+</div>
+</body>
+</html>`;
+
+  triggerDownload(`archon_report_${arch}_${today()}.html`, html, 'text/html');
+  toast('Full HTML report downloaded');
+}
+
+// ── downloadDiagram(type): svg | png | pdf ────────────────────────
+
+function downloadDiagram(type) {
+  if (!result) { alert('Generate an architecture first.'); return; }
+  const svgStr = result.diagrams?.svg;
+  if (!svgStr || svgStr.trim() === '') { alert('No diagram available. Generate an architecture first.'); return; }
+
+  const arch     = slugify((result.architecture?.architecture || 'archon').substring(0, 20));
+  const filename = `archon_diagram_${arch}_${today()}`;
+
+  if (type === 'svg') {
+    triggerDownload(`${filename}.svg`, svgStr, 'image/svg+xml');
+    toast('SVG downloaded');
+    return;
+  }
+
+  // PNG / PDF: render SVG to canvas
+  const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+  const svgUrl  = URL.createObjectURL(svgBlob);
+  const img     = new Image();
+
+  img.onload = () => {
+    const W      = img.naturalWidth  || 800;
+    const H      = img.naturalHeight || 500;
+    const SCALE  = 2;
+    const canvas = document.createElement('canvas');
+    canvas.width  = W * SCALE;
+    canvas.height = H * SCALE;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(SCALE, SCALE);
+    ctx.fillStyle = '#f8f8f6';
+    ctx.fillRect(0, 0, W, H);
+    ctx.drawImage(img, 0, 0, W, H);
+    URL.revokeObjectURL(svgUrl);
+
+    if (type === 'png') {
+      canvas.toBlob(blob => {
+        const pngUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href     = pngUrl;
+        a.download = `${filename}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(pngUrl), 1000);
+        toast('PNG downloaded');
+      }, 'image/png');
+    }
+
+    if (type === 'pdf') {
+      // Convert canvas → data URL, open print window
+      const pngData = canvas.toDataURL('image/png');
+      const win = window.open('', '_blank', 'width=960,height=720');
+      if (!win) { alert('Please allow popups for PDF export.'); return; }
+      win.document.write(`<!DOCTYPE html><html><head><title>Archon AI — Architecture Diagram</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;font-family:sans-serif}
+h2{font-size:15px;color:#534AB7;margin-bottom:14px;font-weight:600}
+img{max-width:100%;height:auto;border:0.5px solid #ddd;border-radius:6px;display:block}
+p{font-size:11px;color:#999;margin-top:10px;text-align:center}
+</style></head>
+<body>
+<h2>Archon AI — Architecture Diagram</h2>
+<img src="${pngData}" alt="Architecture Diagram">
+<p>Generated ${today()} &nbsp;·&nbsp; Use Ctrl+P / Cmd+P to print or save as PDF</p>
+<script>setTimeout(function(){window.print();},500);<\/script>
+</body></html>`);
+      win.document.close();
+      toast('PDF print dialog opened');
+    }
+  };
+
+  img.onerror = () => {
+    URL.revokeObjectURL(svgUrl);
+    alert('Failed to render diagram. Downloading SVG instead.');
+    triggerDownload(`${filename}.svg`, svgStr, 'image/svg+xml');
+  };
+
+  img.src = svgUrl;
+}
+
+// ── Tab switching ─────────────────────────────────────────────────
+
+function sw(tab, el) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  if (result) {
+    render();
+  } else {
+    document.getElementById('pane').innerHTML =
+      '<div class="empty"><h3>No data yet</h3><p>Generate an architecture first.</p></div>';
+  }
+}
+
+// ── Generate ──────────────────────────────────────────────────────
+
+async function generate() {
+  const inp = document.getElementById('inp').value.trim();
+  if (!inp) { alert('Please enter a project description.'); return; }
+
+  const btn = document.getElementById('gen-btn');
+  btn.disabled    = true;
+  btn.textContent = 'Generating…';
+  setStatus('Running pipeline…', true);
+  enableDownloads(false);
+
+  document.getElementById('pane').innerHTML = `
+    <div class="spin">
+      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      <p>Running 7-step pipeline: feature extraction → architecture decision → graph → cost → failures → diagrams → explanation…</p>
+    </div>`;
+
+  const backendUrl = document.getElementById('backend-url').value.trim().replace(/\/$/,'');
+  const payload    = {
+    project_description: inp,
+    cloud_provider:      document.getElementById('cloud').value,
+    scale_override:      document.getElementById('scale').value || null,
+    anthropic_api_key:   document.getElementById('api-key').value.trim() || null,
+  };
+
+  try {
+    const resp = await fetch(`${backendUrl}/generate-architecture`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ detail: resp.statusText }));
+      throw new Error(err.detail || `HTTP ${resp.status}`);
+    }
+    result = await resp.json();
+    enableDownloads(true);
+    setStatus(`Done in ${result.elapsed_ms}ms`, false);
+    render();
+    toast(`Architecture generated in ${result.elapsed_ms}ms`);
+  } catch (e) {
+    document.getElementById('pane').innerHTML = `
+      <div class="err-box">
+        <strong>Connection error:</strong> ${esc(e.message)}<br><br>
+        Make sure the backend is running at <code>${esc(backendUrl)}</code><br>
+        Run: <code>cd backend &amp;&amp; uvicorn main:app --reload</code>
+      </div>`;
+    setStatus('Error', false);
+  }
+
+  btn.disabled    = false;
+  btn.textContent = 'Generate Architecture';
+}
+
+// ── Render ────────────────────────────────────────────────────────
+
+function render() {
+  if (!result) return;
+  const el   = document.getElementById('pane');
+  const d    = result;
+  const f    = d.features     || {};
+  const a    = d.architecture || {};
+  const c    = d.cost         || {};
+  const g    = d.graph        || {};
+  const diag = d.diagrams     || {};
+  const fails = d.failures    || [];
+
+  const card = (title, body) =>
+    `<div class="card"><div class="card-title">${esc(title)}</div>${body}</div>`;
+
+  switch (currentTab) {
+
+    case 'overview':
+      el.innerHTML =
+        card('System overview', `
+          <p style="font-size:13.5px;line-height:1.75;margin-bottom:10px">${esc(a.reason||'')}</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="badge b-purple">${esc(a.architecture)}</span>
+            <span class="badge b-teal">${esc(d.cloud_provider)}</span>
+            <span class="badge b-gray">${esc(f.scale_label)} — ${(f.scale||0).toLocaleString()} users</span>
+            <span class="badge b-amber">~${fmt(c.total_monthly)}/month</span>
+          </div>`) +
+        card('Detected features', `
+          <div class="feat-grid">
+            ${[
+              ['Real-time', f.real_time],['Payments', f.payments],['AI/ML', f.ai_required],
+              ['IoT', f.iot],['Platform', f.platform||'web', true],['Security critical', f.security_critical],
+            ].map(([lbl, val, raw]) => `
+              <div class="feat-card">
+                <div class="feat-val ${raw ? '' : val ? 'feat-yes' : 'feat-no'}"
+                     ${raw ? `style="color:var(--purple)"` : ''}>
+                  ${raw ? esc(val) : (val ? 'Yes' : 'No')}
+                </div>
+                <div class="feat-lbl">${esc(lbl)}</div>
+              </div>`).join('')}
+          </div>`) +
+        card('Graph metrics', `
+          <div class="metrics-row">
+            <div class="metric">Nodes: <strong>${g.metrics?.node_count||0}</strong></div>
+            <div class="metric">Edges: <strong>${g.metrics?.edge_count||0}</strong></div>
+            <div class="metric">Is DAG: <strong>${g.metrics?.is_dag?'Yes':'No'}</strong></div>
+            <div class="metric">Critical path: <strong>${(g.metrics?.critical_path||[]).length} hops</strong></div>
+          </div>`);
+      break;
+
+    case 'blueprint':
+      el.innerHTML =
+        card('Architecture decision', `
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+            <span class="badge b-purple" style="font-size:12px;padding:4px 12px">${esc(a.architecture)}</span>
+            <span style="font-size:12px;color:var(--text2)">${a.confidence||0}% confidence</span>
+          </div>
+          <div class="conf-bar"><div class="conf-fill" style="width:${a.confidence||0}%"></div></div>
+          <p style="font-size:12.5px;color:var(--text2);line-height:1.65">${esc(a.reason)}</p>
+          <div class="tradeoff">Tradeoff: ${esc(a.tradeoffs)}</div>`) +
+        card('Component stack', `
+          ${(a.components||[]).map(c=>`
+            <div class="row-item">
+              <span class="ri-a">${esc(c.layer)}</span>
+              <span class="ri-b">${esc(c.tech)}</span>
+              <span class="ri-c">${esc(c.role)}</span>
+            </div>`).join('')}`) +
+        card('Integrations &amp; APIs', `
+          ${(a.integrations||[]).map(i=>`
+            <div class="row-item">
+              <span class="badge b-teal" style="flex-shrink:0">${esc(i.name)}</span>
+              <span class="ri-c">${esc(i.purpose)}</span>
+            </div>`).join('')}`) +
+        card('Security recommendations', `
+          ${(a.security||[]).map(s=>`
+            <div style="font-size:12px;padding:5px 0;border-bottom:.5px solid var(--border);color:var(--text2)">
+              ${esc(s)}
+            </div>`).join('')}`);
+      break;
+
+    case 'diagram':
+      el.innerHTML =
+        card('Architecture diagram', `
+          <div class="svg-wrap">
+            ${diag.svg || '<p style="color:var(--text3);padding:20px">No diagram generated.</p>'}
+          </div>
+          <div class="diag-actions">
+            <button class="diag-btn" onclick="downloadDiagram('svg')">Download SVG</button>
+            <button class="diag-btn" onclick="downloadDiagram('png')">Download PNG</button>
+            <button class="diag-btn" onclick="downloadDiagram('pdf')">Print / PDF</button>
+          </div>`) +
+        card('Mermaid diagram code', `
+          <p style="font-size:11.5px;color:var(--text3);margin-bottom:6px">
+            Paste into <a href="https://mermaid.live" target="_blank" style="color:var(--purple)">mermaid.live</a> to render interactively.
+          </p>
+          <button class="copy-btn" onclick="copyText(result.diagrams.mermaid||'')">Copy code</button>
+          <div class="mermaid-wrap">${esc(diag.mermaid||'No Mermaid code generated.')}</div>`);
+      break;
+
+    case 'cloud': {
+      const cp = g.metrics?.critical_path || [];
+      el.innerHTML =
+        card(`Cloud services — ${esc(d.cloud_provider||'AWS')}`, `
+          ${(a.components||[]).map(c=>`
+            <div class="row-item">
+              <span class="badge b-teal" style="min-width:110px;text-align:center">${esc(c.layer)}</span>
+              <span class="ri-b">${esc(c.tech)}</span>
+              <span class="ri-c">${esc(c.role)}</span>
+            </div>`).join('')}`) +
+        card('Monitoring &amp; observability', `
+          ${MONITORING_STACK.map(s=>`
+            <div style="font-size:12.5px;padding:5px 0;border-bottom:.5px solid var(--border);color:var(--text2)">
+              ${esc(s)}
+            </div>`).join('')}`) +
+        (cp.length ? card('Critical path (bottleneck chain)', `
+          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px">
+            ${cp.map((n,i,arr)=>`
+              <span class="badge b-gray">${esc(n)}</span>
+              ${i<arr.length-1 ? '<span style="color:var(--text3);font-size:12px">→</span>' : ''}`).join('')}
+          </div>
+          <p style="font-size:11.5px;color:var(--text2)">Longest dependency chain — the bottleneck path under load.</p>`) : '');
+      break;
+    }
+
+    case 'devops':
+      el.innerHTML =
+        card('CI/CD pipeline — GitHub Actions + Docker + Kubernetes', `
+          <div style="margin-bottom:10px">
+            <span class="badge b-purple">Docker + Kubernetes (EKS)</span>
+            <span class="badge b-teal">Prometheus + Grafana</span>
+          </div>
+          ${DEVOPS_STEPS.map((s,i)=>`
+            <div class="pipe-row">
+              <div class="step-num">${i+1}</div>${esc(s)}
+            </div>`).join('')}`) +
+        card('Monitoring stack', `
+          ${MONITORING_STACK.map(s=>`
+            <div style="font-size:12.5px;padding:5px 0;border-bottom:.5px solid var(--border);color:var(--text2)">
+              ${esc(s)}
+            </div>`).join('')}`);
+      break;
+
+    case 'cost':
+      el.innerHTML =
+        card(`Monthly cost estimate — ${esc((f.scale_label||'mid').toUpperCase())} scale`, `
+          <div class="cost-grid">
+            <div class="cost-card"><div class="cost-amt">${fmt(c.compute)}</div><div class="cost-lbl">Compute (EC2/EKS)</div></div>
+            <div class="cost-card"><div class="cost-amt">${fmt(c.database)}</div><div class="cost-lbl">Database (RDS + Redis)</div></div>
+            <div class="cost-card"><div class="cost-amt">${fmt(c.storage)}</div><div class="cost-lbl">Storage (S3 + CDN)</div></div>
+            <div class="cost-card"><div class="cost-amt">${fmt(c.messaging)}</div><div class="cost-lbl">Messaging</div></div>
+            <div class="cost-card"><div class="cost-amt">${fmt(c.networking)}</div><div class="cost-lbl">Networking</div></div>
+            <div class="cost-card"><div class="cost-amt">${fmt(c.monitoring)}</div><div class="cost-lbl">Monitoring</div></div>
+            ${c.ai_serving > 0 ? `<div class="cost-card"><div class="cost-amt">${fmt(c.ai_serving)}</div><div class="cost-lbl">AI serving</div></div>` : ''}
+            ${c.iot        > 0 ? `<div class="cost-card"><div class="cost-amt">${fmt(c.iot)}</div><div class="cost-lbl">IoT</div></div>` : ''}
+            <div class="cost-card hl"><div class="cost-amt">${fmt(c.total_monthly)}</div><div class="cost-lbl">Total / month</div></div>
+          </div>
+          <div class="note-box">${esc(c.note||'')}</div>
+          <p style="font-size:12px;color:var(--text2);margin-top:8px">
+            At 10× scale: <strong>${fmt(c.scaling_10x_estimate)}/month</strong>
+            &nbsp;·&nbsp; Basis: ${esc(c.basis||'')}
+          </p>`);
+      break;
+
+    case 'failures':
+      el.innerHTML =
+        card('Failure simulation — logic-based scenario analysis', `
+          ${fails.map(f=>`
+            <div class="fail-row">
+              <div class="fail-dot ${(f.impact||'medium').toLowerCase()}"></div>
+              <div style="flex:1">
+                <div class="fail-title">
+                  ${esc(f.scenario)}
+                  <span class="badge ${f.impact==='Critical'||f.impact==='High'?'b-coral':'b-amber'}" style="margin-left:6px">
+                    ${esc(f.impact)}
+                  </span>
+                </div>
+                ${f.trigger   ? `<div class="fail-trigger">Trigger: ${esc(f.trigger)}</div>` : ''}
+                <div class="fail-mit">${esc(f.mitigation)}</div>
+                ${f.detection ? `<div class="fail-det">Detection: ${esc(f.detection)}</div>` : ''}
+              </div>
+            </div>`).join('')}`);
+      break;
+
+    case 'explain': {
+      const paras = (d.explanation||'').split('\n\n').filter(Boolean);
+      el.innerHTML =
+        card('AI-generated explanation', `
+          <div class="explain-text">
+            ${paras.length
+              ? paras.map(p=>`<p>${esc(p)}</p>`).join('')
+              : '<p style="color:var(--text3)">No explanation generated. Add an Anthropic API key and regenerate.</p>'}
+          </div>`) +
+        card('Pipeline executed', `
+          ${(d.pipeline?.steps||[]).map((s,i)=>`
+            <div class="pipe-row"><div class="step-num">${i+1}</div>${esc(s)}</div>`).join('')}
+          <div class="note-box" style="margin-top:10px">AI role: ${esc(d.pipeline?.ai_used_for||'—')}</div>`);
+      break;
+    }
+
+    default:
+      el.innerHTML = '<div class="empty"><h3>Unknown tab</h3></div>';
+  }
+}
+
+// ── Clipboard ────────────────────────────────────────────────────
+
+function copyText(txt) {
+  if (!txt) { toast('Nothing to copy'); return; }
+  const fallback = () => {
+    const ta = Object.assign(document.createElement('textarea'), {
+      value: txt, style: 'position:fixed;opacity:0'
+    });
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('Copied to clipboard');
+  };
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(txt).then(() => toast('Copied to clipboard')).catch(fallback);
+  } else {
+    fallback();
+  }
+}
+
+</script>
+</body>
+</html>
